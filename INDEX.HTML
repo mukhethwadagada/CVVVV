@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelligent CV Generator</title>
+    <style>
+        /* Base CSS for the Generator Form */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #007bff;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #007bff;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            background-color: #fcfcfc;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="tel"],
+        .form-group input[type="url"],
+        .form-group input[type="date"],
+        .form-group textarea,
+        .form-group select { /* Added select for styling consistency */
+            width: calc(100% - 22px); /* Account for padding and border */
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1em;
+            box-sizing: border-box; /* Include padding and border in element's total width and height */
+        }
+
+        .form-group textarea {
+            resize: vertical; /* Allow vertical resizing */
+        }
+
+        .form-group small {
+            display: block;
+            color: #777;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+
+        .add-button, .remove-button, .generate-button, .download-button, .ai-button {
+            display: inline-block;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+
+        .add-button {
+            background-color: #28a745;
+            color: white;
+        }
+        .add-button:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .remove-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            font-size: 0.9em;
+            margin-left: 10px;
+        }
+        .remove-button:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .generate-button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            width: auto;
+        }
+        .generate-button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+
+        .download-button {
+            background-color: #6c757d;
+            color: white;
+            padding: 12px 25px;
+            font-size: 1.1em;
+        }
+        .download-button:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .ai-button {
+            background-color: #ff9800; /* Orange color for AI */
+            color: white;
+            padding: 10px 18px;
+            font-size: 0.95em;
+        }
+        .ai-button:hover {
+            background-color: #e68900;
+            transform: translateY(-2px);
+        }
+        .ai-button:disabled {
+            background-color: #ffcc80;
+            cursor: not-allowed;
+        }
+
+        .loading-indicator {
+            margin-left: 10px;
+            font-size: 0.9em;
+            color: #555;
+            display: none; /* Hidden by default */
+        }
+
+        .download-button.disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        .actions {
+            text-align: center;
+            margin-top: 40px;
+            margin-bottom: 40px;
+        }
+
+        .download-options {
+            margin-top: 20px;
+        }
+
+        hr {
+            border: 0;
+            border-top: 1px solid #eee;
+            margin: 40px 0;
+        }
+
+        /* CV Preview Container - Common styles */
+        .cv-output {
+            background-color: #fefefe;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            min-height: 400px;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05);
+            overflow-y: auto; /* Enable scrolling if CV gets very long */
+            padding: 30px; /* Default padding */
+        }
+
+        .cv-output .placeholder-text {
+            text-align: center;
+            color: #999;
+            font-style: italic;
+            padding: 50px;
+        }
+
+        /* --- Template Specific Styles --- */
+
+        /* ATS Friendly Template (Default) */
+        .cv-output.ats-friendly-template {
+            font-family: 'Times New Roman', serif;
+            font-size: 12pt;
+            color: #333;
+            line-height: 1.6;
+        }
+        .cv-output.ats-friendly-template .cv-section { margin-bottom: 20px; }
+        .cv-output.ats-friendly-template .cv-section h3 {
+            font-size: 14pt; font-weight: bold; text-transform: uppercase;
+            border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 10px; color: #333;
+        }
+        .cv-output.ats-friendly-template .cv-personal-info { text-align: left; margin-bottom: 25px; }
+        .cv-output.ats-friendly-template .cv-personal-info h2 {
+            font-size: 20pt; font-weight: bold; margin-bottom: 5px; color: #333; border-bottom: none; padding-bottom: 0;
+        }
+        .cv-output.ats-friendly-template .cv-personal-info p { margin: 0; line-height: 1.2; font-size: 10pt; color: #555; }
+        .cv-output.ats-friendly-template .cv-personal-info a { color: #007bff; text-decoration: none; }
+        .cv-output.ats-friendly-template .cv-personal-info a:hover { text-decoration: underline; }
+        .cv-output.ats-friendly-template .cv-summary p {
+            font-style: normal; text-align: left; margin-bottom: 20px; color: #333; line-height: 1.5; font-size: 11pt;
+        }
+        .cv-output.ats-friendly-template .cv-job,
+        .cv-output.ats-friendly-template .cv-education,
+        .cv-output.ats-friendly-template .cv-project,
+        .cv-output.ats-friendly-template .cv-award {
+            margin-bottom: 15px; padding-bottom: 0; border-bottom: none;
+        }
+        .cv-output.ats-friendly-template .cv-job h4,
+        .cv-output.ats-friendly-template .cv-education h4,
+        .cv-output.ats-friendly-template .cv-project h4,
+        .cv-output.ats-friendly-template .cv-award h4 {
+            margin: 0; color: #333; font-size: 12pt; font-weight: bold; display: inline;
+        }
+        .cv-output.ats-friendly-template .cv-job .meta,
+        .cv-output.ats-friendly-template .cv-education .meta,
+        .cv-output.ats-friendly-template .cv-project .meta,
+        .cv-output.ats-friendly-template .cv-award .meta {
+            font-size: 11pt; color: #555; margin-top: 2px; display: block;
+        }
+        .cv-output.ats-friendly-template .cv-job ul,
+        .cv-output.ats-friendly-template .cv-project ul {
+            list-style: disc; margin-top: 5px; margin-left: 20px; color: #333; font-size: 11pt; padding-left: 0;
+        }
+        .cv-output.ats-friendly-template .cv-job ul li,
+        .cv-output.ats-friendly-template .cv-project ul li { margin-bottom: 3px; line-height: 1.4; }
+        .cv-output.ats-friendly-template .cv-skills p { margin: 0; color: #333; line-height: 1.5; font-size: 11pt; }
+
+        /* Modern Minimalist Template (also ATS compatible) */
+        .cv-output.modern-minimalist-template {
+            font-family: 'Inter', sans-serif; /* A modern sans-serif font, widely supported */
+            font-size: 11pt;
+            color: #222;
+            line-height: 1.5;
+            padding: 40px 30px; /* Slightly more spacious */
+        }
+        .cv-output.modern-minimalist-template .cv-section { margin-bottom: 25px; }
+        .cv-output.modern-minimalist-template .cv-section h3 {
+            font-size: 16pt; font-weight: 600; text-transform: uppercase;
+            border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; color: #007bff;
+            letter-spacing: 0.5px;
+        }
+        .cv-output.modern-minimalist-template .cv-personal-info {
+            text-align: center; margin-bottom: 40px;
+        }
+        .cv-output.modern-minimalist-template .cv-personal-info h2 {
+            font-size: 28pt; font-weight: 700; margin-bottom: 8px; color: #000;
+        }
+        .cv-output.modern-minimalist-template .cv-personal-info p {
+            margin: 0; line-height: 1.4; font-size: 11pt; color: #555;
+            display: flex; justify-content: center; flex-wrap: wrap; gap: 0 15px;
+        }
+        .cv-output.modern-minimalist-template .cv-personal-info p span {
+            white-space: nowrap; /* Prevent breaking lines within contact items */
+        }
+        .cv-output.modern-minimalist-template .cv-personal-info a {
+            color: #007bff; text-decoration: none; font-weight: 500;
+        }
+        .cv-output.modern-minimalist-template .cv-personal-info a:hover { text-decoration: underline; }
+        .cv-output.modern-minimalist-template .cv-summary p {
+            font-style: normal; text-align: center; margin-bottom: 30px; color: #444; line-height: 1.6; font-size: 11.5pt;
+            max-width: 700px; margin-left: auto; margin-right: auto;
+        }
+        .cv-output.modern-minimalist-template .cv-job,
+        .cv-output.modern-minimalist-template .cv-education,
+        .cv-output.modern-minimalist-template .cv-project,
+        .cv-output.modern-minimalist-template .cv-award {
+            margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px dotted #ccc; /* Simple border, easily ignored by ATS */
+        }
+        .cv-output.modern-minimalist-template .cv-job:last-child,
+        .cv-output.modern-minimalist-template .cv-education:last-child,
+        .cv-output.modern-minimalist-template .cv-project:last-child,
+        .cv-output.modern-minimalist-template .cv-award:last-child {
+            border-bottom: none;
+        }
+        .cv-output.modern-minimalist-template .cv-job h4,
+        .cv-output.modern-minimalist-template .cv-education h4,
+        .cv-output.modern-minimalist-template .cv-project h4,
+        .cv-output.modern-minimalist-template .cv-award h4 {
+            margin: 0 0 5px 0; color: #222; font-size: 13pt; font-weight: 600;
+        }
+        .cv-output.modern-minimalist-template .cv-job .meta,
+        .cv-output.modern-minimalist-template .cv-education .meta,
+        .cv-output.modern-minimalist-template .cv-project .meta,
+        .cv-output.modern-minimalist-template .cv-award .meta {
+            font-size: 10.5pt; color: #666; margin-bottom: 8px; display: block;
+        }
+        .cv-output.modern-minimalist-template .cv-job ul,
+        .cv-output.modern-minimalist-template .cv-project ul {
+            list-style: disc; margin-top: 5px; margin-left: 25px; color: #333; font-size: 10.5pt;
+        }
+        .cv-output.modern-minimalist-template .cv-job ul li,
+        .cv-output.modern-minimalist-template .cv-project ul li { margin-bottom: 4px; line-height: 1.3; }
+        .cv-output.modern-minimalist-template .cv-skills p {
+            margin: 0; color: #333; line-height: 1.6; font-size: 11pt;
+        }
+
+        /* Professional Classic Template (NEW - also ATS compatible) */
+        .cv-output.professional-classic-template {
+            font-family: 'Verdana', sans-serif; /* A highly readable sans-serif font */
+            font-size: 11.5pt;
+            color: #333;
+            line-height: 1.5;
+            padding: 35px;
+        }
+        .cv-output.professional-classic-template .cv-section { margin-bottom: 22px; }
+        .cv-output.professional-classic-template .cv-section h3 {
+            font-size: 15pt; font-weight: bold; text-transform: uppercase;
+            border-bottom: 1px solid #555; /* Thicker, darker line */
+            padding-bottom: 6px; margin-bottom: 12px; color: #222;
+        }
+        .cv-output.professional-classic-template .cv-personal-info { text-align: left; margin-bottom: 30px; }
+        .cv-output.professional-classic-template .cv-personal-info h2 {
+            font-size: 24pt; font-weight: 700; margin-bottom: 4px; color: #000;
+        }
+        .cv-output.professional-classic-template .cv-personal-info p {
+            margin: 0; line-height: 1.3; font-size: 10.5pt; color: #555;
+        }
+        .cv-output.professional-classic-template .cv-personal-info a {
+            color: #007bff; text-decoration: none;
+        }
+        .cv-output.professional-classic-template .cv-summary p {
+            font-style: normal; text-align: left; margin-bottom: 20px; color: #333; line-height: 1.5; font-size: 11pt;
+        }
+        .cv-output.professional-classic-template .cv-job,
+        .cv-output.professional-classic-template .cv-education,
+        .cv-output.professional-classic-template .cv-project,
+        .cv-output.professional-classic-template .cv-award {
+            margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid #eee; /* Light separator */
+        }
+        .cv-output.professional-classic-template .cv-job:last-child,
+        .cv-output.professional-classic-template .cv-education:last-child,
+        .cv-output.professional-classic-template .cv-project:last-child,
+        .cv-output.professional-classic-template .cv-award:last-child {
+            border-bottom: none;
+        }
+        .cv-output.professional-classic-template .cv-job h4,
+        .cv-output.professional-classic-template .cv-education h4,
+        .cv-output.professional-classic-template .cv-project h4,
+        .cv-output.professional-classic-template .cv-award h4 {
+            margin: 0; color: #333; font-size: 12.5pt; font-weight: bold; display: inline;
+        }
+        .cv-output.professional-classic-template .cv-job .meta,
+        .cv-output.professional-classic-template .cv-education .meta,
+        .cv-output.professional-classic-template .cv-project .meta,
+        .cv-output.professional-classic-template .cv-award .meta {
+            font-size: 10.5pt; color: #666; margin-top: 2px; display: block;
+        }
+        .cv-output.professional-classic-template .cv-job ul,
+        .cv-output.professional-classic-template .cv-project ul {
+            list-style: disc; margin-top: 5px; margin-left: 20px; color: #333; font-size: 11pt; padding-left: 0;
+        }
+        .cv-output.professional-classic-template .cv-job ul li,
+        .cv-output.professional-classic-template .cv-project ul li { margin-bottom: 3px; line-height: 1.4; }
+        .cv-output.professional-classic-template .cv-skills p {
+            margin: 0; color: #333; line-height: 1.5; font-size: 11pt;
+        }
+
+        /* Responsive adjustments (original styles, still apply) */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+            h2 {
+                font-size: 1.8em;
+            }
+            .add-button, .remove-button, .generate-button, .download-button, .ai-button {
+                display: block;
+                width: 100%;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            .download-options {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Intelligent CV Generator</h1>
+
+        <div class="form-section">
+            <h2>Personal Information</h2>
+            <div class="form-group">
+                <label for="name">Full Name:</label>
+                <input type="text" id="name" placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="john.doe@example.com">
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" placeholder="+123 456 7890">
+            </div>
+            <div class="form-group">
+                <label for="linkedin">LinkedIn Profile (URL):</label>
+                <input type="url" id="linkedin" placeholder="https://linkedin.com/in/johndoe">
+            </div>
+            <div class="form-group">
+                <label for="website">Personal Website/Portfolio (URL):</label>
+                <input type="url" id="website" placeholder="https://johndoe.com">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Summary / Objective</h2>
+            <div class="form-group">
+                <label for="summary">Summary:</label>
+                <textarea id="summary" rows="5" placeholder="A highly motivated and results-oriented professional with X years of experience..."></textarea>
+                <button id="ai-summary-btn" class="ai-button">Generate AI Summary</button>
+                <span id="ai-summary-loading-indicator" class="loading-indicator">Generating...</span>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Education</h2>
+            <div id="education-entries">
+                </div>
+            <button class="add-button" onclick="addEducation()">Add Education</button>
+        </div>
+
+        <div class="form-section">
+            <h2>Work Experience</h2>
+            <div id="experience-entries">
+                </div>
+            <button class="add-button" onclick="addExperience()">Add Work Experience</button>
+        </div>
+
+        <div class="form-section">
+            <h2>Skills</h2>
+            <div class="form-group">
+                <label for="skills">Skills:</label>
+                <textarea id="skills" rows="3" placeholder="JavaScript, Python, SQL, AWS, Docker, HTML, CSS, React, Node.js&#10;Communication, Teamwork, Problem-solving, Leadership"></textarea>
+                <small>Separate skills by commas or new lines.</small>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>Projects (Optional)</h2>
+            <div id="project-entries">
+                </div>
+            <button class="add-button" onclick="addProject()">Add Project</button>
+        </div>
+
+        <div class="form-section">
+            <h2>Awards & Certifications (Optional)</h2>
+            <div id="award-entries">
+                </div>
+            <button class="add-button" onclick="addAward()">Add Award/Certification</button>
+        </div>
+
+        <div class="actions">
+            <div class="form-group">
+                <label for="template-select">Choose Template:</label>
+                <select id="template-select">
+                    <option value="ats-friendly-template">ATS Friendly</option>
+                    <option value="modern-minimalist-template">Modern Minimalist</option>
+                    <option value="professional-classic-template">Professional Classic</option>
+                </select>
+            </div>
+            <button id="generate-cv-btn" class="generate-button">Generate CV Preview</button>
+            <div class="download-options" style="display: none;">
+                <button id="download-html-btn" class="download-button">Download as HTML</button>
+                <button id="download-pdf-btn" class="download-button">Download as PDF</button>
+                <button id="download-doc-btn" class="download-button">Download as Word (.doc)</button>
+            </div>
+        </div>
+
+        <hr>
+
+        <h2>CV Preview</h2>
+        <div id="cv-preview" class="cv-output ats-friendly-template">
+            <p class="placeholder-text">Fill out the form and click "Generate CV Preview" to see your CV.</p>
+        </div>
+    </div>
+
+    <script>
+        // Counter variables for unique IDs
+        let educationCount = 0;
+        let experienceCount = 0;
+        let projectCount = 0;
+        let awardCount = 0;
+
+        // Declare variables for DOM elements at a scope accessible by all functions
+        let cvPreview;
+        let downloadOptionsDiv;
+        let downloadHtmlBtn;
+        let downloadPdfBtn;
+        let downloadDocBtn;
+        let generateCvBtn;
+        let templateSelect;
+        let aiSummaryBtn;
+        let aiSummaryLoadingIndicator; // Specific loading indicator for summary
+        let summaryTextArea;
+
+        // New: Store all input elements to easily attach event listeners for local storage
+        const inputElements = [];
+
+        // Cohere API Configuration
+        const cohere_api_key = "AJ8Gm41WgF37H87kkB1gZ3t17Ch2hdGdE0nzEpC7"; // <<< Your Cohere API token is set here
+        const cohere_api_url = "https://api.cohere.ai/v1/generate";
+        const cohere_model_text_generation = "command"; // Or "command-r", "command-r-plus"
+
+        // Utility function to format dates from YYYY-MM-DD to Month YYYY
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const [year, month, day] = dateString.split('-');
+            const date = new Date(year, month - 1, day);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+        }
+
+        // Function to remove an entry (common for all sections)
+        window.removeEntry = function(button) {
+            const entry = button.closest('.education-entry, .experience-entry, .project-entry, .award-entry');
+            if (entry) {
+                entry.remove();
+                saveData(); // Save data after removing an entry
+                generateCV(); // Regenerate CV to update
+            }
+        };
+
+        // Function to add Education fields
+        window.addEducation = function() {
+            educationCount++;
+            const educationEntries = document.getElementById('education-entries');
+            const newEntry = document.createElement('div');
+            newEntry.classList.add('education-entry');
+            newEntry.dataset.id = `edu-${educationCount}`; // Assign a unique ID for data tracking
+            newEntry.innerHTML = `
+                <div class="form-group">
+                    <label for="degree-${educationCount}">Degree/Qualification:</label>
+                    <input type="text" id="degree-${educationCount}" data-field="degree" placeholder="B.Sc. Computer Science">
+                </div>
+                <div class="form-group">
+                    <label for="university-${educationCount}">University/Institution:</label>
+                    <input type="text" id="university-${educationCount}" data-field="university" placeholder="University of Example">
+                </div>
+                <div class="form-group">
+                    <label for="edu-start-date-${educationCount}">Start Date:</label>
+                    <input type="date" id="edu-start-date-${educationCount}" data-field="startDate">
+                </div>
+                <div class="form-group">
+                    <label for="edu-end-date-${educationCount}">End Date (or Expected):</label>
+                    <input type="date" id="edu-end-date-${educationCount}" data-field="endDate">
+                </div>
+                <button class="remove-button" onclick="removeEntry(this)">Remove</button>
+                <hr>
+            `;
+            educationEntries.appendChild(newEntry);
+            // Add new inputs to the tracking array for local storage
+            newEntry.querySelectorAll('input, textarea, select').forEach(input => inputElements.push(input));
+            attachInputListeners(newEntry);
+        };
+
+        // Function to add Work Experience fields
+        window.addExperience = function() {
+            experienceCount++;
+            const experienceEntries = document.getElementById('experience-entries');
+            const newEntry = document.createElement('div');
+            newEntry.classList.add('experience-entry');
+            newEntry.dataset.id = `exp-${experienceCount}`; // Assign a unique ID for data tracking
+            newEntry.innerHTML = `
+                <div class="form-group">
+                    <label for="job-title-${experienceCount}">Job Title:</label>
+                    <input type="text" id="job-title-${experienceCount}" data-field="jobTitle" placeholder="Software Engineer">
+                </div>
+                <div class="form-group">
+                    <label for="company-${experienceCount}">Company:</label>
+                    <input type="text" id="company-${experienceCount}" data-field="company" placeholder="Tech Innovations Inc.">
+                </div>
+                <div class="form-group">
+                    <label for="job-start-date-${experienceCount}">Start Date:</label>
+                    <input type="date" id="job-start-date-${experienceCount}" data-field="startDate">
+                </div>
+                <div class="form-group">
+                    <label for="job-end-date-${experienceCount}">End Date (or Present):</label>
+                    <input type="date" id="job-end-date-${experienceCount}" data-field="endDate">
+                </div>
+                <div class="form-group">
+                    <label for="job-description-${experienceCount}">Responsibilities/Achievements (one per line):</label>
+                    <textarea id="job-description-${experienceCount}" data-field="description" rows="4" placeholder="- Developed responsive web applications&#10;- Collaborated with cross-functional teams"></textarea>
+                    <button class="ai-button" onclick="generateAIBullets(this, 'job-title-${experienceCount}', 'company-${experienceCount}', 'job-description-${experienceCount}')">Generate AI Bullet Points</button>
+                    <span id="ai-exp-${experienceCount}-loading-indicator" class="loading-indicator">Generating...</span>
+                </div>
+                <button class="remove-button" onclick="removeEntry(this)">Remove</button>
+                <hr>
+            `;
+            experienceEntries.appendChild(newEntry);
+            // Add new inputs to the tracking array for local storage
+            newEntry.querySelectorAll('input, textarea, select').forEach(input => inputElements.push(input));
+            attachInputListeners(newEntry);
+        };
+
+        // Function to add Project fields
+        window.addProject = function() {
+            projectCount++;
+            const projectEntries = document.getElementById('project-entries');
+            const newEntry = document.createElement('div');
+            newEntry.classList.add('project-entry');
+            newEntry.dataset.id = `proj-${projectCount}`; // Assign a unique ID for data tracking
+            newEntry.innerHTML = `
+                <div class="form-group">
+                    <label for="project-name-${projectCount}">Project Name:</label>
+                    <input type="text" id="project-name-${projectCount}" data-field="projectName" placeholder="My Portfolio Website">
+                </div>
+                <div class="form-group">
+                    <label for="project-link-${projectCount}">Project Link (URL - optional):</label>
+                    <input type="url" id="project-link-${projectCount}" data-field="projectLink" placeholder="https://github.com/my-project">
+                </div>
+                <div class="form-group">
+                    <label for="project-description-${projectCount}">Project Description/Details (one per line):</label>
+                    <textarea id="project-description-${projectCount}" data-field="description" rows="3" placeholder="- Built with React and Node.js&#10;- Implemented user authentication"></textarea>
+                </div>
+                <button class="remove-button" onclick="removeEntry(this)">Remove</button>
+                <hr>
+            `;
+            projectEntries.appendChild(newEntry);
+            // Add new inputs to the tracking array for local storage
+            newEntry.querySelectorAll('input, textarea, select').forEach(input => inputElements.push(input));
+            attachInputListeners(newEntry);
+        };
+
+        // Function to add Award/Certification fields
+        window.addAward = function() {
+            awardCount++;
+            const awardEntries = document.getElementById('award-entries');
+            const newEntry = document.createElement('div');
+            newEntry.classList.add('award-entry');
+            newEntry.dataset.id = `award-${awardCount}`; // Assign a unique ID for data tracking
+            newEntry.innerHTML = `
+                <div class="form-group">
+                    <label for="award-name-${awardCount}">Award/Certification Name:</label>
+                    <input type="text" id="award-name-${awardCount}" data-field="awardName" placeholder="Certified JavaScript Developer">
+                </div>
+                <div class="form-group">
+                    <label for="awarding-body-${awardCount}">Awarding Body/Organization (optional):</label>
+                    <input type="text" id="awarding-body-${awardCount}" data-field="awardingBody" placeholder="Code Academy">
+                </div>
+                <div class="form-group">
+                    <label for="award-date-${awardCount}">Date Received:</label>
+                    <input type="date" id="award-date-${awardCount}" data-field="dateReceived">
+                </div>
+                <button class="remove-button" onclick="removeEntry(this)">Remove</button>
+                <hr>
+            `;
+            awardEntries.appendChild(newEntry);
+            // Add new inputs to the tracking array for local storage
+            newEntry.querySelectorAll('input, textarea, select').forEach(input => inputElements.push(input));
+            attachInputListeners(newEntry);
+        };
+
+        // Function to get template-specific CSS
+        function getTemplateCss(templateName) {
+            let css = '';
+            if (templateName === 'ats-friendly-template') {
+                css = `
+                    body {
+                        font-family: 'Times New Roman', serif;
+                        font-size: 12pt;
+                        margin: 0;
+                        padding: 20px;
+                        background-color: #fff;
+                        color: #333;
+                        line-height: 1.6;
+                    }
+                    .cv-container {
+                        max-width: 800px;
+                        margin: 20px auto;
+                        padding: 30px;
+                        border: 1px solid #ddd;
+                        box-shadow: none;
+                    }
+                    .cv-section { margin-bottom: 20px; }
+                    .cv-section h3 {
+                        font-size: 14pt; font-weight: bold; text-transform: uppercase;
+                        border-bottom: 1px solid #000; padding-bottom: 5px; margin-bottom: 10px; color: #333;
+                    }
+                    .cv-personal-info { text-align: left; margin-bottom: 25px; }
+                    .cv-personal-info h2 {
+                        font-size: 20pt; font-weight: bold; margin-bottom: 5px; color: #333; border-bottom: none; padding-bottom: 0;
+                    }
+                    .cv-personal-info p { margin: 0; line-height: 1.2; font-size: 10pt; color: #555; }
+                    .cv-personal-info a { color: #007bff; text-decoration: none; }
+                    .cv-summary p {
+                        font-style: normal; text-align: left; margin-bottom: 20px; color: #333; line-height: 1.5; font-size: 11pt;
+                    }
+                    .cv-job, .cv-education, .cv-project, .cv-award {
+                        margin-bottom: 15px; padding-bottom: 0; border-bottom: none;
+                    }
+                    .cv-job h4, .cv-education h4, .cv-project h4, .cv-award h4 {
+                        margin: 0; color: #333; font-size: 12pt; font-weight: bold; display: inline;
+                    }
+                    .cv-job .meta, .cv-education .meta, .cv-project .meta, .cv-award .meta {
+                        font-size: 11pt; color: #555; margin-top: 2px; display: block;
+                    }
+                    .cv-job ul, .cv-project ul {
+                        list-style: disc; margin-top: 5px; margin-left: 20px; color: #333; font-size: 11pt; padding-left: 0;
+                    }
+                    .cv-job ul li, .cv-project ul li { margin-bottom: 3px; line-height: 1.4; }
+                    .cv-skills p { margin: 0; color: #333; line-height: 1.5; font-size: 11pt; }
+                `;
+            } else if (templateName === 'modern-minimalist-template') {
+                css = `
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+                    body {
+                        font-family: 'Inter', sans-serif; /* A modern sans-serif font, widely supported */
+                        font-size: 11pt;
+                        margin: 0;
+                        padding: 20px;
+                        background-color: #fff;
+                        color: #222;
+                        line-height: 1.5;
+                    }
+                    .cv-container {
+                        max-width: 800px;
+                        margin: 20px auto;
+                        padding: 40px 30px;
+                        border: 1px solid #e0e0e0;
+                        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+                    }
+                    .cv-section { margin-bottom: 25px; }
+                    .cv-section h3 {
+                        font-size: 16pt; font-weight: 600; text-transform: uppercase;
+                        border-bottom: 2px solid #007bff; padding-bottom: 8px; margin-bottom: 15px; color: #007bff;
+                        letter-spacing: 0.5px;
+                    }
+                    .cv-personal-info {
+                        text-align: center; margin-bottom: 40px;
+                    }
+                    .cv-personal-info h2 {
+                        font-size: 28pt; font-weight: 700; margin-bottom: 8px; color: #000;
+                    }
+                    .cv-personal-info p {
+                        margin: 0; line-height: 1.4; font-size: 11pt; color: #555;
+                        display: flex; justify-content: center; flex-wrap: wrap; gap: 0 15px;
+                    }
+                    .cv-personal-info p span { white-space: nowrap; }
+                    .cv-personal-info a { color: #007bff; text-decoration: none; font-weight: 500; }
+                    .cv-summary p {
+                        font-style: normal; text-align: center; margin-bottom: 30px; color: #444; line-height: 1.6; font-size: 11.5pt;
+                        max-width: 700px; margin-left: auto; margin-right: auto;
+                    }
+                    .cv-job, .cv-education, .cv-project, .cv-award {
+                        margin-bottom: 20px; padding-bottom: 10px; border-bottom: 1px dotted #ccc; /* Simple border, easily ignored by ATS */
+                    }
+                    .cv-job:last-child, .cv-education:last-child,
+                    .cv-project:last-child, .cv-award:last-child {
+                        border-bottom: none;
+                    }
+                    .cv-job h4, .cv-education h4, .cv-project h4, .cv-award h4 {
+                        margin: 0 0 5px 0; color: #222; font-size: 13pt; font-weight: 600;
+                    }
+                    .cv-job .meta, .cv-education .meta, .cv-project .meta, .cv-award .meta {
+                        font-size: 10.5pt; color: #666; margin-bottom: 8px; display: block;
+                    }
+                    .cv-job ul, .cv-project ul {
+                        list-style: disc; margin-top: 5px; margin-left: 25px; color: #333; font-size: 10.5pt;
+                    }
+                    .cv-job ul li, .cv-project ul li { margin-bottom: 4px; line-height: 1.3; }
+                    .cv-skills p {
+                        margin: 0; color: #333; line-height: 1.6; font-size: 11pt;
+                    }
+                `;
+            } else if (templateName === 'professional-classic-template') {
+                css = `
+                    @import url('https://fonts.googleapis.com/css2?family=Verdana:wght@400;700&display=swap'); /* Using Verdana as a common web-safe font */
+                    body {
+                        font-family: 'Verdana', sans-serif;
+                        font-size: 11.5pt;
+                        margin: 0;
+                        padding: 20px;
+                        background-color: #fff;
+                        color: #333;
+                        line-height: 1.5;
+                    }
+                    .cv-container {
+                        max-width: 800px;
+                        margin: 20px auto;
+                        padding: 35px;
+                        border: 1px solid #ddd;
+                        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); /* Subtle shadow for depth */
+                    }
+                    .cv-section { margin-bottom: 22px; }
+                    .cv-section h3 {
+                        font-size: 15pt; font-weight: bold; text-transform: uppercase;
+                        border-bottom: 1px solid #555; /* Thicker, darker line */
+                        padding-bottom: 6px; margin-bottom: 12px; color: #222;
+                    }
+                    .cv-personal-info { text-align: left; margin-bottom: 30px; }
+                    .cv-personal-info h2 {
+                        font-size: 24pt; font-weight: 700; margin-bottom: 4px; color: #000;
+                    }
+                    .cv-personal-info p {
+                        margin: 0; line-height: 1.3; font-size: 10.5pt; color: #555;
+                    }
+                    .cv-personal-info a {
+                        color: #007bff; text-decoration: none;
+                    }
+                    .cv-summary p {
+                        font-style: normal; text-align: left; margin-bottom: 20px; color: #333; line-height: 1.5; font-size: 11pt;
+                    }
+                    .cv-job, .cv-education, .cv-project, .cv-award {
+                        margin-bottom: 18px; padding-bottom: 8px; border-bottom: 1px solid #eee; /* Light separator */
+                    }
+                    .cv-job:last-child, .cv-education:last-child,
+                    .cv-project:last-child, .cv-award:last-child {
+                        border-bottom: none;
+                    }
+                    .cv-job h4, .cv-education h4, .cv-project h4, .cv-award h4 {
+                        margin: 0; color: #333; font-size: 12.5pt; font-weight: bold; display: inline;
+                    }
+                    .cv-job .meta, .cv-education .meta, .cv-project .meta, .cv-award .meta {
+                        font-size: 10.5pt; color: #666; margin-top: 2px; display: block;
+                    }
+                    .cv-job ul, .cv-project ul {
+                        list-style: disc; margin-top: 5px; margin-left: 20px; color: #333; font-size: 11pt; padding-left: 0;
+                    }
+                    .cv-job ul li, .cv-project ul li { margin-bottom: 3px; line-height: 1.4; }
+                    .cv-skills p {
+                        margin: 0; color: #333; line-height: 1.5; font-size: 11pt;
+                    }
+                `;
+            }
+            return css;
+        }
+
+
+        // Function to generate the CV preview HTML
+        function generateCV() {
+            console.log("Generate CV button clicked!"); // Debugging log
+
+            try {
+                const name = document.getElementById('name').value;
+                const email = document.getElementById('email').value;
+                const phone = document.getElementById('phone').value;
+                const linkedin = document.getElementById('linkedin').value;
+                const website = document.getElementById('website').value;
+                const summary = summaryTextArea.value; // Use the global summaryTextArea
+                const skills = document.getElementById('skills').value;
+                const selectedTemplate = templateSelect.value; // Get selected template
+
+                console.log("Personal Info:", { name, email, phone, linkedin, website });
+                console.log("Summary:", summary);
+                console.log("Skills:", skills);
+                console.log("Selected Template:", selectedTemplate); // Debugging log
+
+                let educationHtml = '';
+                document.querySelectorAll('.education-entry').forEach((entry) => {
+                    const degree = entry.querySelector(`[data-field="degree"]`).value;
+                    const university = entry.querySelector(`[data-field="university"]`).value;
+                    const eduStartDate = entry.querySelector(`[data-field="startDate"]`).value;
+                    const eduEndDate = entry.querySelector(`[data-field="endDate"]`).value;
+                    if (degree || university || eduStartDate || eduEndDate) { // Only add if any info is present
+                        educationHtml += `
+                            <div class="cv-education">
+                                <h4>${degree || 'N/A'}</h4>
+                                <div class="meta">${university || 'N/A'} | ${formatDate(eduStartDate)} - ${eduEndDate ? formatDate(eduEndDate) : 'Present'}</div>
+                            </div>
+                        `;
+                    }
+                });
+                console.log("Education HTML generated:", educationHtml); // Debugging log
+
+                let experienceHtml = '';
+                document.querySelectorAll('.experience-entry').forEach((entry) => {
+                    const jobTitle = entry.querySelector(`[data-field="jobTitle"]`).value;
+                    const company = entry.querySelector(`[data-field="company"]`).value;
+                    const jobStartDate = entry.querySelector(`[data-field="startDate"]`).value;
+                    const jobEndDate = entry.querySelector(`[data-field="endDate"]`).value;
+                    const jobDescription = entry.querySelector(`[data-field="description"]`).value;
+
+                    if (jobTitle || company || jobStartDate || jobEndDate || jobDescription) { // Only add if any info is present
+                        let descriptionPoints = jobDescription.split('\n').map(point => {
+                            return point.trim() ? `<li>${point.trim()}</li>` : '';
+                        }).filter(Boolean).join(''); // filter(Boolean) removes empty strings
+
+                        experienceHtml += `
+                            <div class="cv-job">
+                                <h4>${jobTitle || 'N/A'}</h4>
+                                <div class="meta">${company || 'N/A'} | ${formatDate(jobStartDate)} - ${jobEndDate ? formatDate(jobEndDate) : 'Present'}</div>
+                                ${descriptionPoints ? `<ul>${descriptionPoints}</ul>` : ''}
+                            </div>
+                        `;
+                    }
+                });
+                console.log("Experience HTML generated:", experienceHtml); // Debugging log
+
+
+                let projectsHtml = '';
+                document.querySelectorAll('.project-entry').forEach((entry) => {
+                    const projectName = entry.querySelector(`[data-field="projectName"]`).value;
+                    const projectLink = entry.querySelector(`[data-field="projectLink"]`).value;
+                    const projectDescription = entry.querySelector(`[data-field="description"]`).value;
+
+                    if (projectName || projectLink || projectDescription) { // Only add if any info is present
+                        let descriptionPoints = projectDescription.split('\n').map(point => {
+                            return point.trim() ? `<li>${point.trim()}</li>` : '';
+                        }).filter(Boolean).join('');
+
+                        projectsHtml += `
+                            <div class="cv-project">
+                                <h4>${projectName} ${projectLink ? `<a href="${projectLink}" target="_blank">(Link)</a>` : ''}</h4>
+                                ${descriptionPoints ? `<ul>${descriptionPoints}</ul>` : ''}
+                            </div>
+                        `;
+                    }
+                });
+                console.log("Projects HTML generated:", projectsHtml); // Debugging log
+
+                let awardsHtml = '';
+                document.querySelectorAll('.award-entry').forEach((entry) => {
+                    const awardName = entry.querySelector(`[data-field="awardName"]`).value;
+                    const awardDate = entry.querySelector(`[data-field="dateReceived"]`).value;
+                    const awardingBody = entry.querySelector(`[data-field="awardingBody"]`).value;
+
+                    if (awardName || awardDate || awardingBody) { // Only add if any info is present
+                        awardsHtml += `
+                            <div class="cv-award">
+                                <h4>${awardName}</h4>
+                                <div class="meta">${awardingBody ? `Issued by ${awardingBody}` : ''} on ${awardDate ? formatDate(awardDate) : ''}</div>
+                            </div>
+                        `;
+                    }
+                });
+                console.log("Awards HTML generated:", awardsHtml); // Debugging log
+
+
+                const cvContent = `
+                    <div class="cv-personal-info">
+                        <h2>${name || 'Your Name'}</h2>
+                        <p>
+                            ${email ? `${email}` : ''}
+                            ${phone ? ` | ${phone}` : ''}
+                            ${linkedin ? ` | <a href="${linkedin}" target="_blank">LinkedIn</a>` : ''}
+                            ${website ? ` | <a href="${website}" target="_blank">Portfolio</a>` : ''}
+                        </p>
+                    </div>
+
+                    ${summary ? `<div class="cv-section cv-summary"><h3>Summary</h3><p>${summary}</p></div>` : ''}
+
+                    ${educationHtml ? `<div class="cv-section"><h3>Education</h3>${educationHtml}</div>` : ''}
+
+                    ${experienceHtml ? `<div class="cv-section"><h3>Work Experience</h3>${experienceHtml}</div>` : ''}
+
+                    ${skills ? `<div class="cv-section cv-skills"><h3>Skills</h3><p>${skills}</p></div>` : ''}
+
+                    ${projectsHtml ? `<div class="cv-section"><h3>Projects</h3>${projectsHtml}</div>` : ''}
+
+                    ${awardsHtml ? `<div class="cv-section"><h3>Awards & Certifications</h3>${awardsHtml}</div>` : ''}
+                `;
+
+                // Update the class of cvPreview based on the selected template
+                cvPreview.className = 'cv-output ' + selectedTemplate;
+
+                cvPreview.innerHTML = cvContent;
+                cvPreview.classList.remove('placeholder-text'); // Remove placeholder text style
+                downloadOptionsDiv.style.display = 'block'; // Show download buttons
+                console.log("CV preview updated and download options shown."); // Debugging log
+
+            } catch (error) {
+                console.error("Error generating CV preview:", error);
+                // Optionally display a user-friendly error message on the page
+                cvPreview.innerHTML = `<p class="placeholder-text" style="color: red;">An error occurred while generating the CV: ${error.message}. Please check the console for more details.</p>`;
+            }
+        }
+
+        /**
+         * Downloads the CV as an HTML file with a specified extension.
+         * This function is also used to generate .doc files (Word-compatible HTML).
+         * @param {string} fileExtension - The extension for the file (e.g., 'html', 'doc').
+         */
+        function downloadCVAsHtml(fileExtension = 'html') {
+            console.log(`Attempting to download as HTML with .${fileExtension} extension...`);
+            try {
+                const cvContent = cvPreview.innerHTML;
+                if (!cvContent || cvContent.trim() === '<p class="placeholder-text">Fill out the form and click "Generate CV Preview" to see your CV.</p>') {
+                    console.warn(`HTML download attempted (${fileExtension}), but CV preview is empty or still showing placeholder.`);
+                    return;
+                }
+
+                const selectedTemplate = templateSelect.value;
+                const templateCss = getTemplateCss(selectedTemplate); // Get CSS for the selected template
+
+                let fullHtmlString = `
+                    <!DOCTYPE html>
+                    <html lang="en">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>My CV</title>
+                        <style>
+                            ${templateCss}
+                        </style>
+                    </head>
+                    <body>
+                        <div class="cv-container ${selectedTemplate}">
+                            ${cvContent}
+                        </div>
+                    </body>
+                    </html>
+                `;
+
+                // For .doc files, add mso-data-placement and other Word-specific meta tags for better rendering
+                let mimeType = 'text/html;charset=utf-8';
+                if (fileExtension === 'doc') {
+                     // Adding MSO-specific tags to help Word render the HTML
+                    fullHtmlString = `<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                                <head>
+                                <meta charset='utf-8'>
+                                <meta name=ProgId content=Word.Document>
+                                <meta name=Generator content='Microsoft Word 9'>
+                                <meta name=Originator content='Microsoft Word 9'>
+                                </head>
+                                <body>${fullHtmlString}</body></html>`; // Reassign fullHtmlString
+                    mimeType = 'application/msword';
+                }
+
+                const blob = new Blob([fullHtmlString], { type: mimeType });
+                console.log(`Blob created for ${fileExtension} download.`); // Debugging log
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `my_${selectedTemplate}_cv.${fileExtension}`; // Dynamic filename
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                console.log(`${fileExtension.toUpperCase()} file download triggered.`); // Debugging log
+            } catch (error) {
+                console.error(`Error downloading ${fileExtension.toUpperCase()}:`, error);
+            }
+        }
+
+        function downloadCVAsPdf() {
+            console.log("Attempting to download as PDF...");
+            if (typeof html2pdf === 'undefined') {
+                console.error("html2pdf.js library is not loaded. Please ensure you have an active internet connection and the CDN link is correct.");
+                return;
+            }
+
+            const element = document.getElementById('cv-preview');
+            if (!element || element.innerHTML.trim() === '<p class="placeholder-text">Fill out the form and click "Generate CV Preview" to see your CV.</p>') {
+                console.warn("PDF download attempted, but CV preview is empty or still showing placeholder.");
+                return;
+            }
+
+            try {
+                // Temporarily wrap the element in a div to apply template styling for PDF
+                const tempDiv = document.createElement('div');
+                const selectedTemplate = templateSelect.value;
+                tempDiv.classList.add('cv-container');
+                tempDiv.classList.add(selectedTemplate); // Apply the selected template class
+                tempDiv.innerHTML = element.innerHTML; // Copy content
+                document.body.appendChild(tempDiv); // Append temporarily to ensure styles are computed
+
+                // Get the inline styles from the head for the specific template
+                const templateCss = getTemplateCss(selectedTemplate);
+                const styleElement = document.createElement('style');
+                styleElement.textContent = templateCss;
+                tempDiv.prepend(styleElement); // Prepend style to the tempDiv
+
+                console.log("Temporary div for PDF created and appended to body with template styles."); // Debugging log
+
+                const opt = {
+                    margin: 1, // Standard margins
+                    filename: `my_${selectedTemplate}_cv.pdf`, // Dynamic filename
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, logging: false, dpi: 192, letterRendering: true },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+
+                console.log("html2pdf options set, initiating generation..."); // Debugging log
+                html2pdf().set(opt).from(tempDiv).save().then(() => {
+                    tempDiv.remove(); // Remove the temporary div after saving
+                    console.log("PDF generated and temporary div removed successfully."); // Debugging log
+                }).catch(error => {
+                    console.error("Error during PDF generation or saving:", error);
+                    tempDiv.remove(); // Ensure tempDiv is removed even on error
+                });
+            } catch (error) {
+                console.error("Error preparing for PDF download:", error);
+            }
+        }
+
+        // Function for Word (.doc) download
+        function downloadCVAsDoc() {
+            downloadCVAsHtml('doc'); // Reuses the HTML download function, but with .doc extension
+        }
+
+        /**
+         * Generic function to call Cohere API.
+         * @param {string} modelId - The ID of the Cohere model to use.
+         * @param {string} prompt - The text prompt for the model.
+         * @returns {Promise<string>} - The generated text.
+         */
+        async function queryCohereModel(modelId, prompt) {
+            if (!cohere_api_key || cohere_api_key === "YOUR_COHERE_API_KEY") {
+                throw new Error("Cohere API key is not set. Please replace 'YOUR_COHERE_API_KEY' in the code with your actual key.");
+            }
+
+            try {
+                const response = await fetch(
+                    cohere_api_url,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${cohere_api_key}`,
+                            'Content-Type': 'application/json'
+                        },
+                        method: "POST",
+                        body: JSON.stringify({
+                            prompt: prompt,
+                            model: modelId,
+                            max_tokens: 200, // Adjust as needed for desired length
+                            temperature: 0.7,
+                            stop_sequences: [] // Optional: specify sequences to stop generation
+                        }),
+                    }
+                );
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error("Cohere API Error:", errorData);
+                    throw new Error(`Cohere API request failed: ${response.status} - ${JSON.stringify(errorData)}`);
+                }
+
+                const result = await response.json();
+                console.log("Cohere API Raw Result:", result);
+
+                if (result.generations && result.generations.length > 0 && result.generations[0].text) {
+                    return result.generations[0].text;
+                } else {
+                    console.warn("Unexpected Cohere API response structure.", result);
+                    throw new Error("No generated text found in Cohere API response.");
+                }
+            } catch (error) {
+                console.error("Error querying Cohere model:", error);
+                throw error;
+            }
+        }
+
+        /**
+         * Generates a CV summary using the Cohere AI API.
+         */
+        async function generateAISummary() {
+            aiSummaryBtn.disabled = true;
+            aiSummaryLoadingIndicator.style.display = 'inline';
+            summaryTextArea.placeholder = "Generating summary, please wait...";
+            console.log("AI Summary generation started with Cohere...");
+
+            const name = document.getElementById('name').value;
+            const skills = document.getElementById('skills').value;
+            const currentSummary = summaryTextArea.value;
+
+            let prompt = `Generate a professional and concise CV summary (3-5 sentences) for a person. `;
+
+            if (name) {
+                prompt += `The person's name is ${name}. `;
+            }
+            if (skills) {
+                prompt += `They have the following key skills: ${skills}. `;
+            }
+            if (currentSummary && currentSummary.trim() !== '' && currentSummary !== "A highly motivated and results-oriented professional with X years of experience...") {
+                prompt += `Also, consider the existing summary for context: "${currentSummary}". `;
+                prompt += `Refine or expand upon it to make it more impactful.`;
+            } else {
+                prompt += `The summary should highlight key strengths and career goals. Focus on being impactful and professional.`;
+            }
+
+            console.log("AI Prompt (Summary - Cohere):", prompt);
+
+            try {
+                const generatedText = await queryCohereModel(cohere_model_text_generation, prompt);
+                summaryTextArea.value = generatedText.trim();
+                console.log("AI Generated Summary (Cohere):", generatedText.trim());
+            } catch (error) {
+                console.error("Error calling Cohere API for Summary:", error);
+                summaryTextArea.value = `Failed to generate summary: ${error.message}. Check console for details.`;
+            } finally {
+                aiSummaryBtn.disabled = false;
+                aiSummaryLoadingIndicator.style.display = 'none';
+                summaryTextArea.placeholder = "A highly motivated and results-oriented professional with X years of experience..."; // Reset placeholder
+                saveData(); // Save data after AI generation
+                generateCV(); // Update CV preview
+            }
+        }
+
+        /**
+         * Generates AI-suggested bullet points for a work experience entry using Cohere AI.
+         * @param {HTMLElement} buttonElement - The button that triggered the generation.
+         * @param {string} jobTitleId - ID of the job title input.
+         * @param {string} companyId - ID of the company input.
+         * @param {string} descriptionId - ID of the description textarea.
+         */
+        async function generateAIBullets(buttonElement, jobTitleId, companyId, descriptionId) {
+            const originalButtonText = buttonElement.textContent;
+            buttonElement.disabled = true;
+            const loadingIndicator = document.getElementById(`ai-exp-${buttonElement.closest('.experience-entry').dataset.id.split('-')[1]}-loading-indicator`);
+            loadingIndicator.style.display = 'inline';
+
+            const jobTitle = document.getElementById(jobTitleId).value;
+            const company = document.getElementById(companyId).value;
+            const descriptionTextArea = document.getElementById(descriptionId);
+            const existingDescription = descriptionTextArea.value;
+            const skills = document.getElementById('skills').value; // Get global skills for context
+
+            let prompt = `Generate 3-5 concise, action-oriented bullet points summarizing responsibilities and achievements for a ${jobTitle || 'professional'} at ${company || 'a company'}.`;
+
+            if (skills) {
+                prompt += ` Incorporate relevant keywords and skills such as: ${skills}.`;
+            }
+            if (existingDescription && existingDescription.trim() !== '') {
+                prompt += ` Also, consider the following existing points for context and enhancement: "${existingDescription}".`;
+            }
+            prompt += ` Use strong verbs. Format each point with a leading dash.`;
+
+            console.log("AI Prompt (Bullets - Cohere):", prompt);
+
+            try {
+                const generatedText = await queryCohereModel(cohere_model_text_generation, prompt);
+                // Format for textarea (one point per line, with a dash if not already present)
+                const formattedBullets = generatedText.split('\n').map(line => {
+                    line = line.trim();
+                    if (!line) return ''; // Remove empty lines
+                    return line.startsWith('-') ? line : `- ${line}`;
+                }).filter(Boolean).join('\n'); // filter(Boolean) removes any empty strings from formatting
+
+                descriptionTextArea.value = formattedBullets;
+                console.log("AI Generated Bullets (Cohere):", formattedBullets);
+            } catch (error) {
+                console.error("Error calling Cohere API for Bullets:", error);
+                descriptionTextArea.value = `Failed to generate bullet points: ${error.message}. Check console for details.`;
+            } finally {
+                buttonElement.disabled = false;
+                loadingIndicator.style.display = 'none';
+                buttonElement.textContent = originalButtonText; // Restore button text
+                saveData(); // Save data after AI generation
+                generateCV(); // Update CV preview
+            }
+        }
+
+
+        // --- Local Storage Functions ---
+
+        function saveData() {
+            const data = {};
+            // Personal Info
+            data.name = document.getElementById('name').value;
+            data.email = document.getElementById('email').value;
+            data.phone = document.getElementById('phone').value;
+            data.linkedin = document.getElementById('linkedin').value;
+            data.website = document.getElementById('website').value;
+            data.summary = document.getElementById('summary').value;
+            data.skills = document.getElementById('skills').value;
+            data.template = templateSelect.value;
+
+            // Dynamic sections
+            data.education = [];
+            document.querySelectorAll('.education-entry').forEach(entry => {
+                data.education.push({
+                    degree: entry.querySelector('[data-field="degree"]').value,
+                    university: entry.querySelector('[data-field="university"]').value,
+                    startDate: entry.querySelector('[data-field="startDate"]').value,
+                    endDate: entry.querySelector('[data-field="endDate"]').value
+                });
+            });
+
+            data.experience = [];
+            document.querySelectorAll('.experience-entry').forEach(entry => {
+                data.experience.push({
+                    jobTitle: entry.querySelector('[data-field="jobTitle"]').value,
+                    company: entry.querySelector('[data-field="company"]').value,
+                    startDate: entry.querySelector('[data-field="startDate"]').value,
+                    endDate: entry.querySelector('[data-field="endDate"]').value,
+                    description: entry.querySelector('[data-field="description"]').value
+                });
+            });
+
+            data.projects = [];
+            document.querySelectorAll('.project-entry').forEach(entry => {
+                data.projects.push({
+                    projectName: entry.querySelector('[data-field="projectName"]').value,
+                    projectLink: entry.querySelector('[data-field="projectLink"]').value,
+                    description: entry.querySelector('[data-field="description"]').value
+                });
+            });
+
+            data.awards = [];
+            document.querySelectorAll('.award-entry').forEach(entry => {
+                data.awards.push({
+                    awardName: entry.querySelector('[data-field="awardName"]').value,
+                    awardingBody: entry.querySelector('[data-field="awardingBody"]').value,
+                    dateReceived: entry.querySelector('[data-field="dateReceived"]').value
+                });
+            });
+
+            localStorage.setItem('cvGeneratorData', JSON.stringify(data));
+            console.log("Data saved to local storage.");
+        }
+
+        function loadData() {
+            const savedData = localStorage.getItem('cvGeneratorData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+
+                // Personal Info
+                document.getElementById('name').value = data.name || '';
+                document.getElementById('email').value = data.email || '';
+                document.getElementById('phone').value = data.phone || '';
+                document.getElementById('linkedin').value = data.linkedin || '';
+                document.getElementById('website').value = data.website || '';
+                document.getElementById('summary').value = data.summary || '';
+                document.getElementById('skills').value = data.skills || '';
+                templateSelect.value = data.template || 'ats-friendly-template';
+
+                // Clear dynamic sections before loading
+                document.getElementById('education-entries').innerHTML = '';
+                document.getElementById('experience-entries').innerHTML = '';
+                document.getElementById('project-entries').innerHTML = '';
+                document.getElementById('award-entries').innerHTML = '';
+
+                educationCount = 0;
+                experienceCount = 0;
+                projectCount = 0;
+                awardCount = 0;
+                inputElements.length = 0; // Clear the tracking array
+
+                // Populate dynamic sections
+                data.education.forEach(edu => {
+                    addEducation();
+                    const entry = document.querySelector(`.education-entry[data-id="edu-${educationCount}"]`);
+                    entry.querySelector('[data-field="degree"]').value = edu.degree;
+                    entry.querySelector('[data-field="university"]').value = edu.university;
+                    entry.querySelector('[data-field="startDate"]').value = edu.startDate;
+                    entry.querySelector('[data-field="endDate"]').value = edu.endDate;
+                });
+
+                data.experience.forEach(exp => {
+                    addExperience();
+                    const entry = document.querySelector(`.experience-entry[data-id="exp-${experienceCount}"]`);
+                    entry.querySelector('[data-field="jobTitle"]').value = exp.jobTitle;
+                    entry.querySelector('[data-field="company"]').value = exp.company;
+                    entry.querySelector('[data-field="startDate"]').value = exp.startDate;
+                    entry.querySelector('[data-field="endDate"]').value = exp.endDate;
+                    entry.querySelector('[data-field="description"]').value = exp.description;
+                });
+
+                data.projects.forEach(proj => {
+                    addProject();
+                    const entry = document.querySelector(`.project-entry[data-id="proj-${projectCount}"]`);
+                    entry.querySelector('[data-field="projectName"]').value = proj.projectName;
+                    entry.querySelector('[data-field="projectLink"]').value = proj.projectLink;
+                    entry.querySelector('[data-field="description"]').value = proj.description;
+                });
+
+                data.awards.forEach(award => {
+                    addAward();
+                    const entry = document.querySelector(`.award-entry[data-id="award-${awardCount}"]`);
+                    entry.querySelector('[data-field="awardName"]').value = award.awardName;
+                    entry.querySelector('[data-field="awardingBody"]').value = award.awardingBody;
+                    entry.querySelector('[data-field="dateReceived"]').value = award.dateReceived;
+                });
+
+                console.log("Data loaded from local storage.");
+            } else {
+                // If no saved data, add initial empty sections
+                addEducation();
+                addExperience();
+                addProject();
+                addAward();
+                console.log("No saved data found. Initial sections added.");
+            }
+             // Ensure all current inputs are tracked for event listeners after loading/initial additions
+            document.querySelectorAll('input, textarea, select').forEach(input => {
+                if (!inputElements.includes(input)) {
+                    inputElements.push(input);
+                }
+            });
+            attachInputListeners(document); // Attach listeners to all currently existing inputs
+        }
+
+        // Attach event listeners to newly added/loaded inputs for saving data
+        function attachInputListeners(parentElement) {
+            parentElement.querySelectorAll('input, textarea, select').forEach(input => {
+                if (!input.classList.contains('has-listener')) { // Prevent adding multiple listeners
+                    input.addEventListener('input', saveData);
+                    input.addEventListener('change', saveData); // For date inputs, etc.
+                    input.classList.add('has-listener');
+                }
+            });
+        }
+
+
+        // Event listeners and initial calls when the DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Assign DOM elements to the globally declared variables
+            generateCvBtn = document.getElementById('generate-cv-btn');
+            cvPreview = document.getElementById('cv-preview');
+            downloadOptionsDiv = document.querySelector('.download-options');
+            downloadHtmlBtn = document.getElementById('download-html-btn');
+            downloadPdfBtn = document.getElementById('download-pdf-btn');
+            downloadDocBtn = document.getElementById('download-doc-btn');
+            templateSelect = document.getElementById('template-select');
+            aiSummaryBtn = document.getElementById('ai-summary-btn');
+            aiSummaryLoadingIndicator = document.getElementById('ai-summary-loading-indicator');
+            summaryTextArea = document.getElementById('summary');
+
+            // Load saved data or add initial empty sections
+            loadData();
+
+            // Set initial template class to cv-preview based on loaded data
+            cvPreview.classList.add(templateSelect.value);
+
+            // Generate AI summary automatically on load IF summary is empty or default placeholder
+            if (summaryTextArea.value.trim() === '' || summaryTextArea.value === "A highly motivated and results-oriented professional with X years of experience...") {
+                await generateAISummary(); // Await the AI summary generation
+            }
+
+            // Attach event listeners
+            generateCvBtn.addEventListener('click', generateCV);
+            downloadHtmlBtn.addEventListener('click', () => downloadCVAsHtml('html'));
+            downloadPdfBtn.addEventListener('click', downloadCVAsPdf);
+            downloadDocBtn.addEventListener('click', downloadCVAsDoc);
+            aiSummaryBtn.addEventListener('click', generateAISummary);
+
+            // Add event listener for template selection
+            templateSelect.addEventListener('change', () => {
+                // Remove existing template classes
+                cvPreview.classList.remove('ats-friendly-template', 'modern-minimalist-template', 'professional-classic-template');
+                // Add the newly selected template class
+                cvPreview.classList.add(templateSelect.value);
+                // Regenerate CV preview to apply new styles instantly
+                generateCV();
+                saveData(); // Save data on template change
+            });
+
+            // Attach input listeners for personal info and skills fields
+            document.getElementById('name').addEventListener('input', saveData);
+            document.getElementById('email').addEventListener('input', saveData);
+            document.getElementById('phone').addEventListener('input', saveData);
+            document.getElementById('linkedin').addEventListener('input', saveData);
+            document.getElementById('website').addEventListener('input', saveData);
+            document.getElementById('skills').addEventListener('input', saveData);
+            summaryTextArea.addEventListener('input', saveData); // Listen to manual changes in summary
+
+            // Trigger initial CV generation for default template preview (after AI summary is done)
+            generateCV();
+        });
+    </script>
+</body>
+</html>
